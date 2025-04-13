@@ -1,22 +1,51 @@
+import { useEffect, useState } from "react";
+
 const Overview = () => {
+  const [data, setData] = useState([]);
+  const [turnover, setTurnover] = useState(0);
+  const [profit, setProfit] = useState(0);
+  const [newCustomers, setNewCustomers] = useState(0);
+
+  useEffect(() => {
+    fetch("https://54d80294-76e9-4d9a-afbc-a95c366d8594.mock.pstmn.io/data")
+      .then((res) => res.json())
+      .then((orders) => {
+        setData(orders);
+
+        // Tính Turnover
+        const totalTurnover = orders.reduce((sum, order) => {
+          const amount = parseFloat(
+            order.orderValue.replace("$", "").replace(",", "")
+          );
+          return sum + amount;
+        }, 0);
+
+        setTurnover(totalTurnover);
+        setProfit(totalTurnover * 0.35); // Giả sử 35% lợi nhuận
+        setNewCustomers(orders.filter((o) => o.status === "New").length);
+      })
+      .catch((err) => console.error("Fetch error:", err));
+  }, []);
+
   return (
     <div className="p-6">
       <h2 className="text-xl font-semibold text-red-800 mb-4">Overview</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="overview-item p-4 bg-white rounded-lg shadow-lg border border-gray-200">
+        <div className="p-4 bg-white rounded-lg shadow-lg border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-700">Turnover</h3>
-          <p className="amount text-xl font-bold text-gray-900">$92,405</p>
-          <p className="change text-green-500">▲ 5.39%</p>
+          <p className="text-xl font-bold text-gray-900">
+            ${turnover.toLocaleString()}
+          </p>
         </div>
-        <div className="overview-item p-4 bg-white rounded-lg shadow-lg border border-gray-200">
+        <div className="p-4 bg-white rounded-lg shadow-lg border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-700">Profit</h3>
-          <p className="amount text-xl font-bold text-gray-900">$32,218</p>
-          <p className="change text-green-500">▲ 5.39%</p>
+          <p className="text-xl font-bold text-gray-900">
+            ${profit.toLocaleString()}
+          </p>
         </div>
-        <div className="overview-item p-4 bg-white rounded-lg shadow-lg border border-gray-200">
+        <div className="p-4 bg-white rounded-lg shadow-lg border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-700">New Customers</h3>
-          <p className="amount text-xl font-bold text-gray-900">298</p>
-          <p className="change text-green-500">▲ 6.84%</p>
+          <p className="text-xl font-bold text-gray-900">{newCustomers}</p>
         </div>
       </div>
     </div>
