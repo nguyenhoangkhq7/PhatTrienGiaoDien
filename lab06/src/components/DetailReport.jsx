@@ -1,58 +1,48 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-const sampleData = [
-  {
-    id: 1,
-    name: "Elizabeth Lee",
-    company: "AvatarSystems",
-    orderValue: "$359",
-    orderDate: "10/07/2023",
-    status: "New",
-  },
-  {
-    id: 2,
-    name: "Carlos Garcia",
-    company: "SmoozeShift",
-    orderValue: "$747",
-    orderDate: "24/07/2023",
-    status: "New",
-  },
-  // thêm dữ liệu giả tiếp theo...
-];
+const DetailReport = () => {
+  const [orders, setOrders] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const perPage = 10;
 
-const DataTable = () => {
-  const [selectedAll, setSelectedAll] = useState(false);
-  const [selectedRows, setSelectedRows] = useState([]);
+  useEffect(() => {
+    axios
+      .get("https://54d80294-76e9-4d9a-afbc-a95c366d8594.mock.pstmn.io/data")
+      .then((res) => setOrders(res.data))
+      .catch((err) => console.error(err));
+  }, []);
 
-  const toggleSelectAll = () => {
-    setSelectedAll(!selectedAll);
-    setSelectedRows(!selectedAll ? sampleData.map((d) => d.id) : []);
-  };
-
-  const toggleRow = (id) => {
-    setSelectedRows((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
-  };
+  const totalPages = Math.ceil(orders.length / perPage);
+  const paginatedOrders = orders.slice(
+    (currentPage - 1) * perPage,
+    currentPage * perPage
+  );
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Detailed Report</h2>
-        <div className="space-x-2">
-          <button className="px-4 py-1 border">Import</button>
-          <button className="px-4 py-1 border">Export</button>
+    <div>
+      {/* Header */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "10px",
+        }}
+      >
+        <h2>Detailed Report</h2>
+        <div>
+          <button>Import</button>
+          <button style={{ marginLeft: "10px" }}>Export</button>
         </div>
       </div>
-      <table className="w-full border text-left">
+
+      {/* Table */}
+      <table border="1" cellPadding="8" cellSpacing="0" width="100%">
         <thead>
           <tr>
             <th>
-              <input
-                type="checkbox"
-                checked={selectedAll}
-                onChange={toggleSelectAll}
-              />
+              <input type="checkbox" />
             </th>
             <th>Customer Name</th>
             <th>Company</th>
@@ -63,38 +53,56 @@ const DataTable = () => {
           </tr>
         </thead>
         <tbody>
-          {sampleData.map((item) => (
-            <tr key={item.id} className="border-t">
+          {paginatedOrders.map((order, index) => (
+            <tr key={index}>
               <td>
-                <input
-                  type="checkbox"
-                  checked={selectedRows.includes(item.id)}
-                  onChange={() => toggleRow(item.id)}
+                <input type="checkbox" />
+              </td>
+              <td>
+                <img
+                  src={order.avatar}
+                  alt={order.name}
+                  width="30"
+                  style={{ verticalAlign: "middle", marginRight: "8px" }}
                 />
+                {order.name}
               </td>
-              <td>{item.name}</td>
-              <td>{item.company}</td>
-              <td>{item.orderValue}</td>
-              <td>{item.orderDate}</td>
-              <td>{item.status}</td>
-              <td>
-                <button>Edit</button>
-              </td>
+              <td>{order.company}</td>
+              <td>{order.orderValue}</td>
+              <td>{order.orderDate}</td>
+              <td>{order.status}</td>
+              <td>✏️</td>
             </tr>
           ))}
         </tbody>
       </table>
-      <div className="mt-4 flex justify-between items-center">
-        <p>{sampleData.length} results</p>
-        <div className="flex space-x-2">
-          <button className="px-2 border">1</button>
-          <button className="px-2 border">2</button>
-          <button className="px-2 border">3</button>
-          {/* có thể thêm nút phân trang giả tiếp theo nếu cần */}
+
+      {/* Footer */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginTop: "10px",
+        }}
+      >
+        <p>{orders.length} results</p>
+        <div>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => setCurrentPage(page)}
+              style={{
+                margin: "0 4px",
+                fontWeight: currentPage === page ? "bold" : "normal",
+              }}
+            >
+              {page}
+            </button>
+          ))}
         </div>
       </div>
     </div>
   );
 };
 
-export default DataTable;
+export default DetailReport;
