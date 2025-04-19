@@ -1,14 +1,25 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-function EditModal({ isOpen, onClose, onSave, initialData }) {
+function EditModal({ isOpen, onClose, onSave, initialData, isAdding }) {
   const [formData, setFormData] = useState(initialData || {});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    setFormData(initialData || {});
-  }, [initialData]);
+    if (isAdding) {
+      setFormData({
+        name: "",
+        company: "",
+        orderValue: "",
+        orderDate: "",
+        status: "New",
+        avatar: "",
+      });
+    } else {
+      setFormData(initialData || {});
+    }
+  }, [initialData, isAdding]);
 
   if (!isOpen) return null;
 
@@ -18,6 +29,7 @@ function EditModal({ isOpen, onClose, onSave, initialData }) {
   };
 
   const handleSubmit = async () => {
+    if (loading) return; // Prevent multiple submissions
     setLoading(true);
     setError(null);
 
@@ -33,23 +45,13 @@ function EditModal({ isOpen, onClose, onSave, initialData }) {
         status: formData.status || "New",
         avatar: formData.avatar || "",
       };
-
-      const response = await axios.put(
-        `https://67fb34d58ee14a54262975bb.mockapi.io/data/orders/${formData.id}`,
-        updatedData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      onSave(response.data);
+      onSave(updatedData);
+      setFormData({}); // Reset form data
       setLoading(false);
       onClose();
     } catch (err) {
-      console.error("Error updating data:", err.response?.data || err);
-      setError("Failed to update data. Please try again.");
+      console.error("Error processing data:", err.response?.data || err);
+      setError("Failed to process data. Please try again.");
       setLoading(false);
     }
   };
@@ -58,7 +60,7 @@ function EditModal({ isOpen, onClose, onSave, initialData }) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300">
       <div className="bg-white p-8 rounded-xl w-full max-w-lg shadow-2xl transform transition-all duration-300 scale-100">
         <h2 className="text-2xl font-bold mb-6 text-gray-900 tracking-tight">
-          Chỉnh sửa thông tin
+          {isAdding ? "Thêm người dùng" : "Chỉnh sửa thông tin"}
         </h2>
 
         {error && (
@@ -198,7 +200,13 @@ function EditModal({ isOpen, onClose, onSave, initialData }) {
                 ></path>
               </svg>
             ) : null}
-            {loading ? "Đang lưu..." : "Lưu"}
+            {loading
+              ? isAdding
+                ? "Đang thêm..."
+                : "Đang lưu..."
+              : isAdding
+              ? "Thêm"
+              : "Lưu"}
           </button>
         </div>
       </div>

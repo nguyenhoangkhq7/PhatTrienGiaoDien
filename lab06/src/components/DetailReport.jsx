@@ -2,38 +2,67 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import EditModal from "../components/EditModal";
 
-const DetailReport = () => {
+const DetailReport = ({ onDataChange }) => {
   const [orders, setOrders] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected] = useState(null);
+  const [isAdding, setIsAdding] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const perPage = 5;
 
   const handleEditClick = (order) => {
     setSelected(order);
+    setIsAdding(false);
     setModalOpen(true);
   };
 
-  const handleSave = async (updatedOrder) => {
+  const handleAddClick = () => {
+    setSelected(null);
+    setIsAdding(true);
+    setModalOpen(true);
+  };
+
+  const fetchOrders = async () => {
     try {
-      const response = await axios.put(
-        `https://67fb34d58ee14a54262975bb.mockapi.io/data/orders/${updatedOrder.id}`,
-        updatedOrder
+      const res = await axios.get(
+        "https://67fb34d58ee14a54262975bb.mockapi.io/data/orders"
       );
-      setOrders((prevOrders) =>
-        prevOrders.map((o) => (o.id === updatedOrder.id ? response.data : o))
-      );
+      setOrders(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSave = async (orderData) => {
+    try {
+      let response;
+      if (orderData.id && !isAdding) {
+        // Update existing order
+        response = await axios.put(
+          `https://67fb34d58ee14a54262975bb.mockapi.io/data/orders/${orderData.id}`,
+          orderData
+        );
+        setOrders((prevOrders) =>
+          prevOrders.map((o) => (o.id === orderData.id ? response.data : o))
+        );
+      } else {
+        // Create new order
+        response = await axios.post(
+          `https://67fb34d58ee14a54262975bb.mockapi.io/data/orders`,
+          orderData
+        );
+        // Thêm đơn hàng mới vào đầu danh sách
+        setOrders((prevOrders) => [response.data, ...prevOrders]);
+      }
       setModalOpen(false);
+      onDataChange(); // Thông báo cho component cha rằng dữ liệu đã thay đổi
     } catch (error) {
-      console.error("Update failed:", error);
+      console.error("Operation failed:", error);
     }
   };
 
   useEffect(() => {
-    axios
-      .get("https://67fb34d58ee14a54262975bb.mockapi.io/data/orders")
-      .then((res) => setOrders(res.data))
-      .catch((err) => console.error(err));
+    fetchOrders();
   }, []);
 
   const totalPages = Math.ceil(orders.length / perPage);
@@ -48,6 +77,12 @@ const DetailReport = () => {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Detailed Report</h2>
         <div className="space-x-3">
+          <button
+            onClick={handleAddClick}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
+          >
+            Add User
+          </button>
           <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200">
             Import
           </button>
@@ -126,6 +161,7 @@ const DetailReport = () => {
         onClose={() => setModalOpen(false)}
         onSave={handleSave}
         initialData={selected}
+        isAdding={isAdding}
       />
 
       {/* Footer - Pagination */}
