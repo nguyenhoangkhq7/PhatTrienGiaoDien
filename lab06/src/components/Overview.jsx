@@ -7,7 +7,7 @@ const Overview = () => {
   const [newCustomers, setNewCustomers] = useState(0);
 
   useEffect(() => {
-    fetch("https://54d80294-76e9-4d9a-afbc-a95c366d8594.mock.pstmn.io/data")
+    fetch("https://67fb34d58ee14a54262975bb.mockapi.io/data/orders")
       .then((res) => res.json())
       .then((orders) => {
         setData(orders);

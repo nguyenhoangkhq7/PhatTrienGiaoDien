@@ -7,25 +7,31 @@ const DetailReport = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const perPage = 10;
+  const perPage = 5;
 
   const handleEditClick = (order) => {
     setSelected(order);
     setModalOpen(true);
   };
 
-  const handleSave = (updatedOrder) => {
-    setOrders((prev) =>
-      prev.map((order) =>
-        order.name === updatedOrder.name ? updatedOrder : order
-      )
-    );
-    setModalOpen(false);
+  const handleSave = async (updatedOrder) => {
+    try {
+      const response = await axios.put(
+        `https://67fb34d58ee14a54262975bb.mockapi.io/data/orders/${updatedOrder.id}`,
+        updatedOrder
+      );
+      setOrders((prevOrders) =>
+        prevOrders.map((o) => (o.id === updatedOrder.id ? response.data : o))
+      );
+      setModalOpen(false);
+    } catch (error) {
+      console.error("Update failed:", error);
+    }
   };
 
   useEffect(() => {
     axios
-      .get("https://54d80294-76e9-4d9a-afbc-a95c366d8594.mock.pstmn.io/data")
+      .get("https://67fb34d58ee14a54262975bb.mockapi.io/data/orders")
       .then((res) => setOrders(res.data))
       .catch((err) => console.error(err));
   }, []);
@@ -68,9 +74,9 @@ const DetailReport = () => {
             </tr>
           </thead>
           <tbody>
-            {paginatedOrders.map((order, index) => (
+            {paginatedOrders.map((order) => (
               <tr
-                key={index}
+                key={order.id}
                 className="border-t hover:bg-gray-50 transition-colors duration-200"
               >
                 <td className="px-6 py-4">
