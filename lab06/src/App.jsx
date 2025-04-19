@@ -12,10 +12,10 @@ import Integrations from "./pages/Integrations";
 function App() {
   return (
     <div className="h-screen grid grid-cols-12">
-      <div className="col-span-3 bg-[#1e293b] text-white">
+      <div className="col-span-2 text-white">
         <Sidebar />
       </div>
-      <div className="col-span-9">
+      <div className="col-span-10">
         <Routes>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/projects" element={<Projects />} />

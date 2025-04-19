@@ -11,10 +11,12 @@ const menuItems = [
 
 function Sidebar() {
   return (
-    <div className="w-64 h-screen border-r p-4 flex flex-col justify-between">
+    <div className="w-64 h-screen p-4 flex flex-col justify-between bg-white">
       <div>
         {/* Logo */}
-        <div className="mb-8 text-2xl font-bold text-pink-600">Logo</div>
+        <div className="mb-8">
+          <img src="/img/Logo.png" alt="Logo" className="h-8 w-auto" />
+        </div>
 
         {/* Menu Items */}
         <div className="space-y-2">
@@ -25,8 +27,8 @@ function Sidebar() {
               className={({ isActive }) =>
                 `flex items-center space-x-2 px-4 py-2 rounded cursor-pointer ${
                   isActive
-                    ? "bg-pink-100 text-pink-600 font-semibold"
-                    : "hover:bg-gray-100 text-gray-700"
+                    ? "bg-[#ec4899] text-white font-semibold"
+                    : "hover:bg-gray-100 text-gray-600"
                 }`
               }
             >
@@ -38,12 +40,18 @@ function Sidebar() {
       </div>
 
       {/* Bottom Banner */}
-      <div className="mt-6 p-4 bg-gray-100 rounded text-sm text-center">
-        <div className="mb-2 font-semibold">V2.0 is available</div>
-        <div className="flex justify-center items-center mb-3">
-          <div className="w-24 h-16 bg-yellow-300 rounded-sm" />
+      <div className="mt-6 p-4 bg-white rounded text-sm text-center">
+        <div className="mb-2 font-semibold text-gray-800 text-base">
+          V2.0 IS AVAILABLE
         </div>
-        <button className="px-4 py-1 border text-pink-600 rounded hover:bg-pink-50">
+        <div className="flex justify-center items-center mb-3">
+          <img
+            src="/img/BottomBanner.png"
+            alt="Banner Illustration"
+            className="w-24 h-16 object-contain"
+          />
+        </div>
+        <button className="px-4 py-1 border border-[#ec4899] text-[#ec4899] rounded">
           Try now
         </button>
       </div>
